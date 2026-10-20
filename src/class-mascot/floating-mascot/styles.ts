@@ -7,11 +7,38 @@ import {
   spacingMedium,
 } from '@bigbluebutton/bbb-ui-components-react';
 
-const Card = styled.div`
+const Card = styled.div<{ $minimized: boolean }>`
   display: flex;
   flex-direction: column;
-  width: 15rem;
+  width: ${({ $minimized }: { $minimized: boolean }) => ($minimized ? 'auto' : '15rem')};
   color: ${colors.text.default};
+`;
+
+// Minimized for the current user only: picture, level and the essential buttons.
+const Chip = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacingSmall};
+  padding: ${spacingXSmall} ${spacingXSmall} ${spacingXSmall} ${spacingSmall};
+`;
+
+const ChipText = styled.div`
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+`;
+
+// Read by screen readers, not shown.
+const VisuallyHidden = styled.div`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `;
 
 const Header = styled.div`
@@ -56,6 +83,9 @@ const ConfirmActions = styled.div`
 
 export default {
   Card,
+  Chip,
+  ChipText,
+  VisuallyHidden,
   Header,
   HeaderActions,
   Body,

@@ -33,6 +33,8 @@ const MODERATOR_ROLE = 'MODERATOR';
 // BBB keeps a floating window (and where it was dragged) while its id stays the same.
 const FLOATING_WINDOW_ID = 'class-mascot-floating-window';
 const SETTINGS_PANEL_ID = 'class-mascot-settings';
+// Same radius as the Live sidebar panels (measured; the library token is 1rem).
+const FLOATING_WINDOW_RADIUS = '14px';
 
 // BBB renders floating windows and sidebar panels into elements it owns, through a
 // React root the plugin creates once. Content is updated by re-rendering that root,
@@ -212,6 +214,8 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
       backgroundColor: colors.background.white,
       boxShadow: `0 4px 16px ${colors.shadow.default}`,
       contentFunction: (element: HTMLElement) => {
+        // BBB gives the window element itself; round it like the sidebar panels.
+        Object.assign(element.style, { borderRadius: FLOATING_WINDOW_RADIUS, overflow: 'hidden' });
         savePositionOnDrop(element);
         const root = ReactDOM.createRoot(element);
         floatingTarget.current = { root, element };

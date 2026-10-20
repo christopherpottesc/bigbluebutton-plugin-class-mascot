@@ -1,11 +1,12 @@
-// Where the floating window was last dropped, kept per browser so it survives
-// hiding the mascot and reloading the room.
+// Floating window preferences kept per browser, so they survive hiding the mascot
+// and reloading the room: where it was last dropped and whether it is minimized.
 interface FloatingPosition {
   top: number;
   left: number;
 }
 
 const POSITION_STORAGE_KEY = 'class-mascot:floating-position';
+const MINIMIZED_STORAGE_KEY = 'class-mascot:floating-minimized';
 const DEFAULT_POSITION: FloatingPosition = { top: 80, left: 20 };
 
 function readSavedPosition(): FloatingPosition {
@@ -38,4 +39,21 @@ function savePositionOnDrop(element: HTMLElement): void {
   });
 }
 
-export { readSavedPosition, savePositionOnDrop };
+// Whether this user minimized the floating window; it only affects their own view.
+function readMinimized(): boolean {
+  try {
+    return localStorage.getItem(MINIMIZED_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function saveMinimized(minimized: boolean): void {
+  try {
+    localStorage.setItem(MINIMIZED_STORAGE_KEY, String(minimized));
+  } catch {
+    // Storage blocked: the choice lasts until the window is recreated.
+  }
+}
+
+export { readSavedPosition, savePositionOnDrop, readMinimized, saveMinimized };

@@ -24,21 +24,6 @@ const Info = styled.div`
   width: 100%;
 `;
 
-const Image = styled.img`
-  width: 8rem;
-  height: 8rem;
-  object-fit: contain;
-`;
-
-const Fallback = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 8rem;
-  height: 8rem;
-  line-height: 1;
-`;
-
 const Bar = styled.div`
   width: 100%;
   height: 0.5rem;
@@ -51,13 +36,15 @@ const BarFill = styled.div`
   height: 100%;
   background-color: ${colors.brand.brand1};
   transition: width 0.3s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 `;
 
 export default {
   Wrapper,
   Info,
-  Image,
-  Fallback,
   Bar,
   BarFill,
 };

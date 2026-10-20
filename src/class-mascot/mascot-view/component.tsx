@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { BBBTypography } from '@bigbluebutton/bbb-ui-components-react';
 
 import { MAX_POINTS, MIN_POINTS, MASCOT_OPTIONS } from '../constants';
 import { MascotModel } from '../types';
+import MascotImage from '../mascot-image/component';
+import { useLevelChange } from './level-change';
 import Styled from './styles';
 
 interface MascotViewProps {
@@ -12,35 +13,23 @@ interface MascotViewProps {
   points: number;
 }
 
-// Images live in public/assets/mascots/<model>/<level>.png, one per level (1 to 10).
-// While an image is missing, an emoji placeholder is shown instead.
 function MascotView({ assetsBaseUrl, model, points }: MascotViewProps): React.ReactElement {
-  const [imageFailed, setImageFailed] = useState<boolean>(false);
   const option = MASCOT_OPTIONS.find((o) => o.model === model);
-  const imageUrl = `${assetsBaseUrl}/assets/mascots/${model}/${points}.png`;
-
-  useEffect(() => {
-    setImageFailed(false);
-  }, [imageUrl]);
+  const { direction, changeKey } = useLevelChange(points);
 
   return (
     <Styled.Wrapper className="mascot-view">
-      {imageFailed ? (
-        <Styled.Fallback aria-hidden style={{ fontSize: `${2 + points * 0.4}rem` }}>
-          {option?.fallbackEmoji}
-        </Styled.Fallback>
-      ) : (
-        <Styled.Image
-          src={imageUrl}
-          alt={`${option?.label} nível ${points}`}
-          onError={() => setImageFailed(true)}
-        />
-      )}
+      <MascotImage
+        key={changeKey}
+        assetsBaseUrl={assetsBaseUrl}
+        model={model}
+        points={points}
+        size="large"
+        direction={direction}
+      />
       <Styled.Info>
         <BBBTypography variant="selected">{option?.label}</BBBTypography>
-        <BBBTypography variant="text3" className="mascot-view-level">
-          {`Nível ${points}/${MAX_POINTS}`}
-        </BBBTypography>
+        <BBBTypography className="mascot-view-level">{`Nível ${points}/${MAX_POINTS}`}</BBBTypography>
       </Styled.Info>
       <Styled.Bar
         role="progressbar"

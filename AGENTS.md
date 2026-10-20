@@ -14,7 +14,8 @@ src/class-mascot/component.tsx    # SDK wiring (data channel, floating window, s
 src/class-mascot/state.ts         # Points rules as pure functions (+1, reset, inactivity), tested
 src/class-mascot/control-panel/   # Moderator settings, rendered in the sidebar panel
 src/class-mascot/floating-mascot/ # Floating window content and its saved position
-src/class-mascot/mascot-view/     # Mascot image, level and progress bar
+src/class-mascot/mascot-view/     # Mascot with level and progress bar; level change animation and announcement
+src/class-mascot/mascot-image/    # Mascot picture (or emoji placeholder) in large and small sizes
 src/class-mascot/relay.ts         # Temporary state relay client (see Pitfalls)
 demo/                             # Runs the plugin outside BBB with a mocked SDK
 public/assets/                    # Mascot images and the panel illustration
@@ -57,6 +58,7 @@ Unit tests cover the points rules in `state.ts`. Verify UI changes in the demo (
 - **Floating window and sidebar panel render in roots the plugin creates once.** BBB calls `contentFunction` a single time per window/panel id, so content is updated by re-rendering the stored root (reading the latest values from a ref), and only while its element is still in the page (BBB unmounts the panel when it closes).
 - **Keep the floating window id fixed.** A new id makes BBB mount a new window and lose where it was dragged. The position is read from react-draggable's `transform: translate(...)` and saved in `localStorage`.
 - **Sidebar panels may already be listed in the apps gallery.** Do not add an `AppsGalleryEntry` too, or the plugin appears twice.
+- **Respect reduced motion.** Level change animations are disabled under `prefers-reduced-motion`; keep it that way for new ones.
 - **The client may use a dark theme.** Use the color tokens from `@bigbluebutton/bbb-ui-components-react`, not hard-coded colors, and transparent backgrounds in images.
 
 ## Assets
