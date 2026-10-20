@@ -29,8 +29,8 @@ format: ## Auto-format code
 	npm run format
 
 .PHONY: test
-test: ## Run test suite (no automated tests yet)
-	@echo "No automated tests yet. Check changes with 'make demo' and in a BBB room."
+test: ## Run unit tests
+	npm test
 
 .PHONY: run
 run: ## Serve the plugin on http://localhost:4701 (manifest, bundle and state relay)
