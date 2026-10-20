@@ -10,7 +10,8 @@ BigBlueButton plugin. The class has a mascot that grows from level 1 to 10 as st
 
 ```text
 src/index.tsx                     # Entry point; derives assetsBaseUrl from the script URL
-src/class-mascot/component.tsx    # State, SDK wiring (data channel, floating window, sidebar panel)
+src/class-mascot/component.tsx    # SDK wiring (data channel, floating window, sidebar panel)
+src/class-mascot/state.ts         # Points rules as pure functions (+1, reset, inactivity), tested
 src/class-mascot/control-panel/   # Moderator settings, rendered in the sidebar panel
 src/class-mascot/floating-mascot/ # Floating window content and its saved position
 src/class-mascot/mascot-view/     # Mascot image, level and progress bar
@@ -35,10 +36,11 @@ manifest.json                     # Plugin manifest, read by BBB when a room is 
 - `make run` - Serve manifest, bundle and state relay on http://localhost:4701
 - `make demo` - Run the plugin outside BBB on http://localhost:4702
 - `make lint` - ESLint, type-check and Prettier check
+- `make test` - Unit tests (Jest) for the points rules
 - `make format` - Format code
 - `make build` - Production bundle in `dist/`
 
-There are no automated tests. Verify UI changes in the demo (`?role=moderator` and `?role=viewer` in two tabs share the same state) and in a BBB room.
+Unit tests cover the points rules in `state.ts`. Verify UI changes in the demo (`?role=moderator` and `?role=viewer` in two tabs share the same state) and in a BBB room.
 
 ## Testing in a BBB room
 
@@ -48,6 +50,7 @@ There are no automated tests. Verify UI changes in the demo (`?role=moderator` a
 
 ## Pitfalls
 
+- **Inactivity is derived, not applied by a timer.** Every client computes the current level from `points`, `lastActivityAt` and `inactivityMinutes` (`normalize`), so it keeps decaying with no moderator in the room. Any change must go through the functions in `state.ts`, which fold the elapsed decay in before saving.
 - **Manifest is read only when the room is created.** Changing `manifest.json` needs a new room; changing code only needs a page reload, since the bundle is fetched on join.
 - **Some servers do not persist the data channel.** `pluginDataChannelPushEntry` can return `true` without storing anything. As a fallback, state also goes through a relay in the dev server (`webpack.config.js`, `src/class-mascot/relay.ts`): in memory, no authentication, only while `make run` is up. The data channel wins as soon as it has entries.
 - **`pushEntry` starts undefined.** The SDK only sets it once BBB builds the data channel; always guard before calling it.

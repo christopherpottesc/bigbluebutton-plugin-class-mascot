@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { MdPets } from 'react-icons/md';
 import * as ReactDOM from 'react-dom/client';
 
@@ -12,17 +12,20 @@ import {
   pluginLogger,
 } from 'bigbluebutton-html-plugin-sdk';
 import { colors } from '@bigbluebutton/bbb-ui-components-react';
-import {
-  DATA_CHANNEL_NAME,
-  DEFAULT_INACTIVITY_MINUTES,
-  INACTIVITY_CHECK_INTERVAL_MS,
-  INITIAL_POINTS,
-  MAX_POINTS,
-  MIN_POINTS,
-} from './constants';
+import { DATA_CHANNEL_NAME } from './constants';
 import { ClassMascotProps, MascotModel, MascotState } from './types';
 import ControlPanel from './control-panel/component';
 import { pushRelayState, useRelayState } from './relay';
+import {
+  addPoint,
+  hide,
+  isVisible,
+  nextDecayAt,
+  normalize,
+  resetPoints,
+  selectModel,
+  setInactivityMinutes,
+} from './state';
 import FloatingMascot from './floating-mascot/component';
 import { readSavedPosition, savePositionOnDrop } from './floating-mascot/position';
 
@@ -51,37 +54,51 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
   const [localMascotState, setLocalMascotState] = useState<MascotState | null>(null);
 
   const currentUser = pluginApi.useCurrentUser();
-  const usersBasicInfo = pluginApi.useUsersBasicInfo();
   const meetingData = pluginApi.useMeetingData((meeting) => ({ meetingId: meeting.meetingId }));
   const meetingId = meetingData?.data?.meetingId;
-  const { data: mascotStateResponse, pushEntry: pushMascotState } =
-    pluginApi.useDataChannel<MascotState>(DATA_CHANNEL_NAME, DataChannelTypes.LATEST_ITEM);
+  const {
+    data: mascotStateResponse,
+    pushEntry: pushMascotState,
+    replaceEntry: replaceMascotState,
+  } = pluginApi.useDataChannel<MascotState>(DATA_CHANNEL_NAME, DataChannelTypes.LATEST_ITEM);
 
-  const channelMascotState = mascotStateResponse?.data?.[0]?.payloadJson ?? null;
+  const channelEntry = mascotStateResponse?.data?.[0];
+  const channelMascotState = channelEntry?.payloadJson ?? null;
   // The relay is only needed while the data channel stays empty.
   const relayMascotState = useRelayState(assetsBaseUrl, meetingId, !channelMascotState);
   const newestFallbackState =
     [localMascotState, relayMascotState]
       .filter(Boolean)
       .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))[0] ?? null;
-  const mascotState: MascotState | null = channelMascotState ?? newestFallbackState;
+  const storedState: MascotState | null = channelMascotState ?? newestFallbackState;
+
+  // Every client derives the current level from the stored state, and re-renders when
+  // the next point is lost (see state.ts).
+  const [now, setNow] = useState<number>(() => Date.now());
+  useEffect(() => {
+    if (!storedState) return undefined;
+    const decayAt = nextDecayAt(storedState, Date.now());
+    if (decayAt === null) return undefined;
+    const timeout = setTimeout(() => setNow(Date.now()), Math.max(0, decayAt - Date.now()) + 50);
+    return () => clearTimeout(timeout);
+  }, [storedState, now]);
+  const mascotState = useMemo(
+    () => (storedState ? normalize(storedState, now) : null),
+    [storedState, now]
+  );
+
   // The SDK only provides pushEntry once BBB has set up the data channel.
   const isDataChannelReady = !!pushMascotState;
-  const currentUserId = currentUser?.data?.userId;
   const isModerator = currentUser?.data?.role === MODERATOR_ROLE;
 
-  // Only one client should apply the inactivity penalty, otherwise each moderator
-  // would discount a point. The moderator with the smallest userId takes the job.
-  const inactivityLeaderId = usersBasicInfo?.data?.user
-    ?.filter((user) => user.isModerator && !user.bot)
-    .map((user) => user.userId)
-    .sort()[0];
-  const isInactivityLeader = isModerator && currentUserId === inactivityLeaderId;
-
-  const pushState = (changes: Omit<MascotState, 'updatedAt'>) => {
-    const state = { ...changes, updatedAt: Date.now() };
+  const saveState = (state: MascotState) => {
     setLocalMascotState(state);
     pushRelayState(assetsBaseUrl, meetingId, state);
+    // Keep a single entry in the channel instead of one per change.
+    if (channelEntry) {
+      replaceMascotState(channelEntry.entryId, state);
+      return;
+    }
     if (!pushMascotState) {
       pluginLogger.warn('Class mascot data channel is not ready, state not saved', state);
       return;
@@ -89,40 +106,15 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
     pushMascotState(state);
   };
 
-  const updateMascotState = (changes: Partial<MascotState>) => {
-    pushState({ ...mascotState, ...changes } as MascotState);
-  };
+  const handleSelectModel = (model: MascotModel) =>
+    saveState(selectModel(storedState, model, Date.now()));
+  const handleAddPoint = () => saveState(addPoint(storedState, Date.now()));
+  const handleReset = () => saveState(resetPoints(storedState, Date.now()));
+  const handleHide = () => saveState(hide(storedState, Date.now()));
+  const handleChangeInactivityMinutes = (minutes: number) =>
+    saveState(setInactivityMinutes(storedState, minutes, Date.now()));
 
-  const handleSelectModel = (model: MascotModel) => {
-    if (mascotState) {
-      updateMascotState({ model, visible: true });
-      return;
-    }
-    pushState({
-      model,
-      visible: true,
-      points: INITIAL_POINTS,
-      inactivityMinutes: DEFAULT_INACTIVITY_MINUTES,
-      lastActivityAt: Date.now(),
-    });
-  };
-
-  const handleAddPoint = () => {
-    updateMascotState({
-      points: Math.min(mascotState.points + 1, MAX_POINTS),
-      lastActivityAt: Date.now(),
-    });
-  };
-
-  const handleReset = () => {
-    updateMascotState({ points: INITIAL_POINTS, lastActivityAt: Date.now() });
-  };
-
-  const handleHide = () => {
-    updateMascotState({ visible: false });
-  };
-
-  const isMascotVisible = !!mascotState && mascotState.visible !== false;
+  const isMascotVisible = !!mascotState && isVisible(mascotState);
 
   const openSettings = () => pluginApi.uiCommands?.sidekickArea.panel.open(SETTINGS_PANEL_ID);
 
@@ -136,10 +128,7 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
     onAddPoint: handleAddPoint,
     onReset: handleReset,
     onHide: handleHide,
-    onChangeInactivityMinutes: (inactivityMinutes: number) =>
-      updateMascotState({
-        inactivityMinutes,
-      }),
+    onChangeInactivityMinutes: handleChangeInactivityMinutes,
   };
 
   const floatingTarget = useRef<ExternalRoot | null>(null);
@@ -241,23 +230,6 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
     // The render functions read everything from refs; these are the values they show.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mascotState, isModerator, isDataChannelReady]);
-
-  useEffect(() => {
-    // The countdown pauses while the mascot is hidden.
-    if (!isInactivityLeader || !isMascotVisible) return undefined;
-    const interval = setInterval(() => {
-      const inactiveMs = Date.now() - mascotState.lastActivityAt;
-      if (inactiveMs < mascotState.inactivityMinutes * 60 * 1000) return;
-      if (mascotState.points <= MIN_POINTS) return;
-      updateMascotState({
-        points: mascotState.points - 1,
-        lastActivityAt: Date.now(),
-      });
-    }, INACTIVITY_CHECK_INTERVAL_MS);
-    return () => clearInterval(interval);
-    // updateMascotState only depends on mascotState, which is already listed.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInactivityLeader, isMascotVisible, mascotState]);
 
   return null;
 }

@@ -8,7 +8,7 @@ Plugin do BigBlueButton (SDK `1.0.0-beta.3`): a turma tem um mascote que evolui 
 - O mascote aparece numa janela flutuante para todos da sala, com o nível atual.
 - O moderador confirma participações com **+1 ponto**, até o nível 10.
 - Sem participação por um tempo configurável (padrão: 8 minutos), o mascote perde 1 ponto, até o nível 1.
-- O estado é compartilhado pelo data channel `mascot-state`. O desconto por inatividade roda só no cliente de um moderador, para não descontar em dobro.
+- O estado é compartilhado pelo data channel `mascot-state`. O desconto por inatividade não depende de nenhuma aba aberta: cada participante calcula o nível atual a partir da última atividade, então o mascote continua perdendo pontos mesmo sem moderador na sala.
 
 ## Imagens
 
@@ -21,6 +21,7 @@ make install         # instala as dependências
 make install-hooks   # uma vez depois de clonar: roda o lint antes de cada commit
 make run             # serve manifest, bundle e relay em http://localhost:4701
 make lint            # ESLint, type-check e Prettier
+make test            # testes das regras de pontos (Jest)
 make build           # gera dist/ClassMascot.js, dist/manifest.json e dist/assets/
 ```
 
@@ -32,7 +33,7 @@ make build           # gera dist/ClassMascot.js, dist/manifest.json e dist/asset
 make demo            # abre em http://localhost:4702
 ```
 
-Roda o plugin numa página que imita o BBB: menu lateral, galeria de apps, janela flutuante e data channel. O SDK é trocado por `demo/sdk-mock.ts` e o estado fica no `localStorage`, então abas do mesmo navegador funcionam como participantes da mesma sala. Use `?role=viewer` para entrar como aluno; o botão "Zerar estado" apaga o mascote. Cada aba de moderador roda o desconto por inatividade, então teste com um moderador só.
+Roda o plugin numa página que imita o BBB: menu lateral, galeria de apps, janela flutuante e data channel. O SDK é trocado por `demo/sdk-mock.ts` e o estado fica no `localStorage`, então abas do mesmo navegador funcionam como participantes da mesma sala. Use `?role=viewer` para entrar como aluno; o botão "Zerar estado" apaga o mascote.
 
 ### Numa sala do BBB
 
