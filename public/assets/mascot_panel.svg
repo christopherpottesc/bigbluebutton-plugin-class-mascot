@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1088" role="img" aria-labelledby="title">
+  <title id="title">Mascote da turma evoluindo com a participação</title>
+  <!-- Placeholder illustration for the settings panel; replace with the final art (1920x1088). -->
+  <rect x="160" y="64" width="1600" height="960" rx="96" fill="#102133"/>
+  <circle cx="1460" cy="300" r="180" fill="#00595e" opacity="0.6"/>
+  <circle cx="420" cy="820" r="140" fill="#3b4a5b" opacity="0.7"/>
+
+  <!-- Level bars growing from left to right -->
+  <g fill="#008c95">
+    <rect x="420" y="700" width="90" height="120" rx="20"/>
+    <rect x="560" y="640" width="90" height="180" rx="20"/>
+    <rect x="700" y="570" width="90" height="250" rx="20"/>
+    <rect x="840" y="490" width="90" height="330" rx="20"/>
+  </g>
+  <rect x="980" y="400" width="90" height="420" rx="20" fill="#86eff5"/>
+
+  <!-- Stylised mascot head on top of the tallest bar -->
+  <g transform="translate(1025 300)">
+    <circle r="120" fill="#f28c28" stroke="#102133" stroke-width="16"/>
+    <path d="M-95 -70 L-125 -165 L-35 -110 Z" fill="#f28c28" stroke="#102133" stroke-width="16" stroke-linejoin="round"/>
+    <path d="M95 -70 L125 -165 L35 -110 Z" fill="#f28c28" stroke="#102133" stroke-width="16" stroke-linejoin="round"/>
+    <ellipse cx="-42" cy="-12" rx="38" ry="30" fill="#102133"/>
+    <circle cx="-42" cy="-14" r="14" fill="#ffffff"/>
+    <circle cx="42" cy="-14" r="14" fill="#102133"/>
+    <ellipse cx="0" cy="40" rx="26" ry="18" fill="#102133"/>
+    <path d="M-40 70 Q0 100 40 70" fill="none" stroke="#102133" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <!-- +1 badge -->
+  <g transform="translate(1340 640)">
+    <circle r="110" fill="#86eff5"/>
+    <text x="0" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="120" font-weight="700" fill="#102133">+1</text>
+  </g>
+  <path d="M1220 520 l24 -48 l24 48 l-24 -16 z" fill="#86eff5"/>
+  <path d="M1500 860 l18 -36 l18 36 l-18 -12 z" fill="#5b9093"/>
+</svg>

@@ -1,0 +1,8 @@
+#!/bin/bash
+# Pre-commit hook: runs linter before each commit.
+# Install via: make install-hooks
+set -e
+
+echo "Running pre-commit checks..."
+make lint
+echo "✅ All checks passed."

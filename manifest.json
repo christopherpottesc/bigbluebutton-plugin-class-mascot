@@ -1,0 +1,22 @@
+{
+  "requiredSdkVersion": "^1.0.0-beta.2",
+  "name": "ClassMascot",
+  "version": "0.1.0",
+  "javascriptEntrypointUrl": "ClassMascot.js",
+  "loggerSettings": {
+    "console": {
+      "level": "info"
+    }
+  },
+  "dataChannels": [
+    {
+      "name": "mascot-state",
+      "pushPermission": [
+        "moderator"
+      ],
+      "replaceOrDeletePermission": [
+        "moderator"
+      ]
+    }
+  ]
+}

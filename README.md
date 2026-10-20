@@ -1,0 +1,49 @@
+# Class Mascot Plugin
+
+Plugin do BigBlueButton (SDK `1.0.0-beta.3`): a turma tem um mascote que evolui de 1 a 10 conforme a participação.
+
+## Como funciona
+
+- O moderador abre **Mascote da turma** na galeria de apps e escolhe o mascote (Mconfito, Caramelo ou Frajola).
+- O mascote aparece numa janela flutuante para todos da sala, com o nível atual.
+- O moderador confirma participações com **+1 ponto**, até o nível 10.
+- Sem participação por um tempo configurável (padrão: 8 minutos), o mascote perde 1 ponto, até o nível 1.
+- O estado é compartilhado pelo data channel `mascot-state`. O desconto por inatividade roda só no cliente de um moderador, para não descontar em dobro.
+
+## Imagens
+
+Uma imagem por nível em `public/assets/mascots/<mascote>/<nível>.png` (ex.: `public/assets/mascots/mconfito/1.png` até `10.png`). Enquanto a imagem não existir, o plugin mostra um emoji no lugar.
+
+## Desenvolvimento
+
+```bash
+make install         # instala as dependências
+make install-hooks   # uma vez depois de clonar: roda o lint antes de cada commit
+make run             # serve manifest, bundle e relay em http://localhost:4701
+make lint            # ESLint, type-check e Prettier
+make build           # gera dist/ClassMascot.js, dist/manifest.json e dist/assets/
+```
+
+`make help` lista todos os comandos.
+
+### Demo local (sem BBB)
+
+```bash
+make demo            # abre em http://localhost:4702
+```
+
+Roda o plugin numa página que imita o BBB: menu lateral, galeria de apps, janela flutuante e data channel. O SDK é trocado por `demo/sdk-mock.ts` e o estado fica no `localStorage`, então abas do mesmo navegador funcionam como participantes da mesma sala. Use `?role=viewer` para entrar como aluno; o botão "Zerar estado" apaga o mascote. Cada aba de moderador roda o desconto por inatividade, então teste com um moderador só.
+
+### Numa sala do BBB
+
+Para testar numa sala, exponha a porta 4701 em HTTPS (ex.: `cloudflared tunnel --url http://localhost:4701`) e passe na chamada `create`:
+
+```
+pluginManifests=[{"url":"https://<endereço>/manifest.json"}]
+```
+
+O manifest só é lido quando a sala é criada: depois de mudar o `manifest.json`, crie uma sala nova. Mudanças no código só pedem recarregar a página.
+
+### Relay temporário
+
+Alguns servidores não gravam o data channel do plugin, então o estado do mascote também passa por um relay no próprio servidor de desenvolvimento (`webpack.config.js` e `src/class-mascot/relay.ts`). Ele guarda o estado em memória, sem autenticação, e só funciona enquanto o `make run` e o túnel estiverem no ar. Quando o data channel funcionar, o plugin passa a usá-lo e o relay pode ser removido.
