@@ -15,6 +15,7 @@ import { colors } from '@bigbluebutton/bbb-ui-components-react';
 import { DATA_CHANNEL_NAME } from './constants';
 import { ClassMascotProps, MascotModel, MascotState } from './types';
 import ControlPanel from './control-panel/component';
+import ActivityWatcher from './activity-watcher/component';
 import { pushRelayState, useRelayState } from './relay';
 import {
   addPoint,
@@ -22,6 +23,7 @@ import {
   isVisible,
   nextDecayAt,
   normalize,
+  registerActivity,
   resetPoints,
   selectModel,
   setInactivityMinutes,
@@ -115,6 +117,13 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
   const handleHide = () => saveState(hide(storedState, Date.now()));
   const handleChangeInactivityMinutes = (minutes: number) =>
     saveState(setInactivityMinutes(storedState, minutes, Date.now()));
+
+  // A student's chat message or reaction restarts the countdown (no points).
+  const handleActivity = (at: number) => {
+    if (!storedState) return;
+    const next = registerActivity(storedState, at, Date.now());
+    if (next !== storedState) saveState(next);
+  };
 
   const isMascotVisible = !!mascotState && isVisible(mascotState);
 
@@ -235,7 +244,7 @@ function ClassMascot({ pluginUuid: uuid, assetsBaseUrl }: ClassMascotProps): Rea
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mascotState, isModerator, isDataChannelReady]);
 
-  return null;
+  return isModerator ? <ActivityWatcher pluginApi={pluginApi} onActivity={handleActivity} /> : null;
 }
 
 export default ClassMascot;

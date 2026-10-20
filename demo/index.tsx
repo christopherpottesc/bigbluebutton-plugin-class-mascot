@@ -10,6 +10,8 @@ import {
   uiStore,
   dataChannelStorageKey,
   openDemoPanel,
+  simulateStudentMessage,
+  simulateStudentReaction,
 } from './sdk-mock';
 import ClassMascot from '../src/class-mascot/component';
 import { DATA_CHANNEL_NAME } from '../src/class-mascot/constants';
@@ -108,6 +110,12 @@ function DemoShell() {
         <a href={otherRoleUrl} target="_blank" rel="noreferrer">
           {`Abrir como ${isModerator ? 'aluno' : 'moderador'} em nova aba`}
         </a>
+        <button type="button" onClick={simulateStudentMessage}>
+          Aluno mandou mensagem
+        </button>
+        <button type="button" onClick={simulateStudentReaction}>
+          Aluno reagiu
+        </button>
         <button type="button" onClick={resetDemo}>
           Zerar estado
         </button>

@@ -1,4 +1,10 @@
-import { DEFAULT_INACTIVITY_MINUTES, INITIAL_POINTS, MAX_POINTS, MIN_POINTS } from './constants';
+import {
+  ACTIVITY_MIN_INTERVAL_MS,
+  DEFAULT_INACTIVITY_MINUTES,
+  INITIAL_POINTS,
+  MAX_POINTS,
+  MIN_POINTS,
+} from './constants';
 import { MascotModel, MascotState } from './types';
 
 // Rules for the mascot's points, as pure functions of the stored state and the time.
@@ -88,6 +94,17 @@ function setInactivityMinutes(state: MascotState, minutes: number, now: number):
   };
 }
 
+// Class activity (a student's chat message or reaction) restarts the countdown
+// without adding points. Returns the same state, so nothing is saved, when the
+// mascot is hidden or the activity is too close to the last one.
+function registerActivity(state: MascotState, at: number, now: number): MascotState {
+  if (!isVisible(state)) return state;
+  const activityAt = Math.min(at, now);
+  const current = normalize(state, activityAt);
+  if (activityAt - current.lastActivityAt < ACTIVITY_MIN_INTERVAL_MS) return state;
+  return { ...current, lastActivityAt: activityAt, updatedAt: now };
+}
+
 function hide(state: MascotState, now: number): MascotState {
   return { ...normalize(state, now), visible: false, updatedAt: now };
 }
@@ -100,5 +117,6 @@ export {
   addPoint,
   resetPoints,
   setInactivityMinutes,
+  registerActivity,
   hide,
 };

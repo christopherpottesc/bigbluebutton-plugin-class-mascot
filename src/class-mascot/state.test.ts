@@ -6,6 +6,7 @@ import {
   normalize,
   resetPoints,
   selectModel,
+  registerActivity,
   setInactivityMinutes,
 } from './state';
 import { MascotState } from './types';
@@ -118,5 +119,41 @@ describe('hide', () => {
     const hidden = hide(mascot(), START + 9 * MINUTE);
     expect(hidden).toMatchObject({ visible: false, points: 4 });
     expect(normalize(hidden, START + 100 * MINUTE).points).toBe(4);
+  });
+});
+
+describe('registerActivity', () => {
+  it('restarts the countdown without adding points', () => {
+    const state = registerActivity(mascot(), START + 5 * MINUTE, START + 5 * MINUTE);
+    expect(state).toMatchObject({ points: 5, lastActivityAt: START + 5 * MINUTE });
+    expect(normalize(state, START + 12 * MINUTE).points).toBe(5);
+  });
+
+  it('applies the points lost before the activity', () => {
+    const state = registerActivity(mascot(), START + 17 * MINUTE, START + 17 * MINUTE);
+    expect(state).toMatchObject({ points: 3, lastActivityAt: START + 17 * MINUTE });
+  });
+
+  it('uses the time of the activity, not when it was noticed', () => {
+    const state = registerActivity(mascot(), START + 5 * MINUTE, START + 6 * MINUTE);
+    expect(state).toMatchObject({
+      lastActivityAt: START + 5 * MINUTE,
+      updatedAt: START + 6 * MINUTE,
+    });
+  });
+
+  it('ignores activity right after the last one, so nothing is saved', () => {
+    const state = mascot();
+    expect(registerActivity(state, START + 10 * 1000, START + 10 * 1000)).toBe(state);
+  });
+
+  it('ignores activity while the mascot is hidden', () => {
+    const hidden = mascot({ visible: false });
+    expect(registerActivity(hidden, START + 5 * MINUTE, START + 5 * MINUTE)).toBe(hidden);
+  });
+
+  it('never moves the countdown into the future', () => {
+    const state = registerActivity(mascot(), START + 9 * MINUTE, START + 5 * MINUTE);
+    expect(state.lastActivityAt).toBe(START + 5 * MINUTE);
   });
 });

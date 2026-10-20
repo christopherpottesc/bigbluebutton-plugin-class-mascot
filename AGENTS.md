@@ -16,6 +16,7 @@ src/class-mascot/control-panel/   # Moderator settings, rendered in the sidebar 
 src/class-mascot/floating-mascot/ # Floating window content and its saved position
 src/class-mascot/mascot-view/     # Mascot with level and progress bar; level change animation and announcement
 src/class-mascot/mascot-image/    # Mascot picture (or emoji placeholder) in large and small sizes
+src/class-mascot/activity-watcher/ # Student chat messages and reactions, via custom GraphQL subscriptions
 src/class-mascot/relay.ts         # Temporary state relay client (see Pitfalls)
 demo/                             # Runs the plugin outside BBB with a mocked SDK
 public/assets/                    # Mascot images and the panel illustration
@@ -54,6 +55,7 @@ Unit tests cover the points rules in `state.ts`. Verify UI changes in the demo (
 - **Inactivity is derived, not applied by a timer.** Every client computes the current level from `points`, `lastActivityAt` and `inactivityMinutes` (`normalize`), so it keeps decaying with no moderator in the room. Any change must go through the functions in `state.ts`, which fold the elapsed decay in before saving.
 - **Manifest is read only when the room is created.** Changing `manifest.json` needs a new room; changing code only needs a page reload, since the bundle is fetched on join.
 - **Some servers do not persist the data channel.** `pluginDataChannelPushEntry` can return `true` without storing anything. As a fallback, state also goes through a relay in the dev server (`webpack.config.js`, `src/class-mascot/relay.ts`): in memory, no authentication, only while `make run` is up. The data channel wins as soon as it has entries.
+- **Student activity comes from custom GraphQL subscriptions.** The SDK has no hook for reactions, so `activity-watcher/detection.ts` queries BBB 3.0's schema directly (`chat_message_public` with `senderRole`/`messageType`, `user.reactionEmoji`). Re-check these field names when the BBB version changes. Activity only restarts the countdown, never adds points, and only moderators' clients record it.
 - **`pushEntry` starts undefined.** The SDK only sets it once BBB builds the data channel; always guard before calling it.
 - **Floating window and sidebar panel render in roots the plugin creates once.** BBB calls `contentFunction` a single time per window/panel id, so content is updated by re-rendering the stored root (reading the latest values from a ref), and only while its element is still in the page (BBB unmounts the panel when it closes).
 - **Keep the floating window id fixed.** A new id makes BBB mount a new window and lose where it was dragged. The position is read from react-draggable's `transform: translate(...)` and saved in `localStorage`.

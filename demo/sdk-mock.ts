@@ -232,6 +232,42 @@ function useDataChannel<T>(
   };
 }
 
+// Simulated student activity, answered to the plugin's custom subscriptions.
+const demoActivity = {
+  latestMessage: null as { messageId: string; createdAt: string } | null,
+  reactions: [] as { userId: string; reactionEmoji: string | null }[],
+};
+
+export function simulateStudentMessage(): void {
+  demoActivity.latestMessage = {
+    messageId: Math.random().toString(36).slice(2),
+    createdAt: new Date().toISOString(),
+  };
+  emitUiChange();
+}
+
+export function simulateStudentReaction(): void {
+  demoActivity.reactions = [{ userId: 'demo-student', reactionEmoji: '👍' }];
+  emitUiChange();
+  // Like BBB, the reaction clears after a few seconds.
+  setTimeout(() => {
+    demoActivity.reactions = [{ userId: 'demo-student', reactionEmoji: null }];
+    emitUiChange();
+  }, 3000);
+}
+
+function useCustomSubscription<T>(query: string) {
+  const [, setVersion] = useState(0);
+  useEffect(() => subscribeToUi(() => setVersion((v) => v + 1)), []);
+  let data: unknown = null;
+  if (query.includes('chat_message_public')) {
+    data = { chat_message_public: demoActivity.latestMessage ? [demoActivity.latestMessage] : [] };
+  } else if (query.includes('reactionEmoji')) {
+    data = { user: demoActivity.reactions };
+  }
+  return { loading: false, data: data as T };
+}
+
 const pluginApi = {
   useCurrentUser: () => ({ loading: false, data: demoUser }),
   // Only this tab's user is known, so each moderator tab runs the inactivity timer.
@@ -251,6 +287,7 @@ const pluginApi = {
     },
   }),
   useDataChannel,
+  useCustomSubscription,
   useMeetingData: <T>(projection?: (meeting: { meetingId: string }) => T) => {
     const meeting = { meetingId: 'demo-meeting' };
     return { loading: false, data: projection ? projection(meeting) : meeting };
