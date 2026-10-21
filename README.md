@@ -4,7 +4,7 @@ Plugin do BigBlueButton (SDK `1.0.0-beta.3`): a turma tem um mascote que evolui 
 
 ## Como funciona
 
-- O moderador abre **Mascote da turma** na galeria de apps e escolhe o mascote (Mconfito, Caramelo ou Frajola).
+- O moderador abre **Mascote da turma** na galeria de apps e escolhe o mascote (Mconfito, Mconfito Pixel, Caramelo ou Frajola). Todo mascote começa no nível 3.
 - O mascote aparece numa janela flutuante para todos da sala, com o nível atual.
 - O moderador confirma participações com **+1 ponto**, até o nível 10.
 - Qualquer pessoa pode minimizar a janela do mascote só para si; a escolha fica salva no navegador.

@@ -1,4 +1,4 @@
-import { MAX_POINTS, MIN_POINTS } from './constants';
+import { INITIAL_POINTS, MAX_POINTS, MIN_POINTS } from './constants';
 import {
   addPoint,
   hide,
@@ -66,7 +66,7 @@ describe('nextDecayAt', () => {
 describe('selectModel', () => {
   it('creates a new mascot at the initial level', () => {
     const created = selectModel(null, 'mconfito', START);
-    expect(created).toMatchObject({ model: 'mconfito', points: 1, visible: true });
+    expect(created).toMatchObject({ model: 'mconfito', points: INITIAL_POINTS, visible: true });
     expect(created.lastActivityAt).toBe(START);
   });
 
@@ -100,7 +100,7 @@ describe('addPoint', () => {
 describe('resetPoints', () => {
   it('goes back to the initial level', () => {
     expect(resetPoints(mascot({ points: 9 }), START + MINUTE)).toMatchObject({
-      points: 1,
+      points: INITIAL_POINTS,
       lastActivityAt: START + MINUTE,
     });
   });

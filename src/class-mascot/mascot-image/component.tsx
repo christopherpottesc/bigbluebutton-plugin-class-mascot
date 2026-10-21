@@ -13,6 +13,8 @@ interface MascotImageProps {
   size: MascotImageSize;
   // Animates the change of level when set; restart it by changing the React key.
   direction?: LevelDirection | null;
+  // Hides the image from screen readers when a label next to it already names the mascot.
+  decorative?: boolean;
 }
 
 // Images live in public/assets/mascots/<model>/<level>.png, one per level (1 to 10).
@@ -23,6 +25,7 @@ function MascotImage({
   points,
   size,
   direction = null,
+  decorative = false,
 }: MascotImageProps): React.ReactElement {
   const [imageFailed, setImageFailed] = useState<boolean>(false);
   const option = MASCOT_OPTIONS.find((o) => o.model === model);
@@ -33,7 +36,7 @@ function MascotImage({
   }, [imageUrl]);
 
   // The emoji grows with the level, so the placeholder still shows the evolution.
-  const emojiSize = size === 'large' ? `${2 + points * 0.4}rem` : '1.5rem';
+  const emojiSize = { large: `${2 + points * 0.4}rem`, option: '2rem', small: '1.5rem' }[size];
 
   return (
     <Styled.Frame $size={size} $direction={direction}>
@@ -44,7 +47,8 @@ function MascotImage({
       ) : (
         <Styled.Image
           src={imageUrl}
-          alt={`${option?.label} nível ${points}`}
+          $pixelArt={option?.pixelArt ?? false}
+          alt={decorative ? '' : `${option?.label} nível ${points}`}
           onError={() => setImageFailed(true)}
         />
       )}

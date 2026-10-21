@@ -65,5 +65,5 @@ Unit tests cover the points rules in `state.ts`. Verify UI changes in the demo (
 
 ## Assets
 
-- Mascot images: `public/assets/mascots/<mconfito|caramelo|frajola>/<1..10>.png`, 200x200 PNG with transparent background, shown at 100x100. Missing images fall back to an emoji.
+- Mascot images: `public/assets/mascots/<mconfito|mconfito-pixel|caramelo|frajola>/<1..10>.png`, 250x250 PNG with transparent background, shown at 128px (64px in the picker, at the initial level 3). Pixel art options set `pixelArt` so they scale without smoothing. Missing images fall back to an emoji. The source files and the level scale are in the Notion page "Imagens mascotes" (Hackweek Mconf 2026 / Grupo 4).
 - Panel illustration: `public/assets/mascot_panel.svg` (16:9, 1920x1088); the current file is a placeholder.
