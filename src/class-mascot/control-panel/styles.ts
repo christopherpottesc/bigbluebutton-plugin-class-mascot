@@ -53,7 +53,7 @@ const Section = styled.section`
 
 const ModelOptions = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: ${spacingSmall};
 `;
 
@@ -86,11 +86,6 @@ const ModelOption = styled.button<{ $selected: boolean }>`
   }
 `;
 
-const ModelEmoji = styled.span`
-  font-size: 2rem;
-  line-height: 1;
-`;
-
 const Preview = styled.div`
   display: flex;
   justify-content: center;
@@ -121,7 +116,6 @@ export default {
   Section,
   ModelOptions,
   ModelOption,
-  ModelEmoji,
   Preview,
   Footer,
 };

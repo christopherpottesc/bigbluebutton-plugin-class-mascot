@@ -5,6 +5,7 @@ import { BBButton, BBBSlider, BBBTypography } from '@bigbluebutton/bbb-ui-compon
 import { INITIAL_POINTS, MASCOT_OPTIONS, MAX_POINTS } from '../constants';
 import { MascotModel, MascotState } from '../types';
 import MascotView from '../mascot-view/component';
+import MascotImage from '../mascot-image/component';
 import Styled from './styles';
 
 const MIN_INACTIVITY_MINUTES = 1;
@@ -75,7 +76,13 @@ function ControlPanel({
                   disabled={!isReady}
                   onClick={() => onSelectModel(option.model)}
                 >
-                  <Styled.ModelEmoji aria-hidden>{option.fallbackEmoji}</Styled.ModelEmoji>
+                  <MascotImage
+                    assetsBaseUrl={assetsBaseUrl}
+                    model={option.model}
+                    points={INITIAL_POINTS}
+                    size="option"
+                    decorative
+                  />
                   <BBBTypography as="span" variant={selected ? 'selected' : 'default'}>
                     {option.label}
                   </BBBTypography>

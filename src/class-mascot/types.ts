@@ -4,12 +4,14 @@ interface ClassMascotProps {
   assetsBaseUrl: string;
 }
 
-type MascotModel = 'mconfito' | 'caramelo' | 'frajola';
+type MascotModel = 'mconfito' | 'mconfito-pixel' | 'caramelo' | 'frajola';
 
 interface MascotOption {
   model: MascotModel;
   label: string;
   fallbackEmoji: string;
+  // Scaled without smoothing, so the pixels stay sharp.
+  pixelArt?: boolean;
 }
 
 // Shared by every participant through the data channel; only moderators push it.

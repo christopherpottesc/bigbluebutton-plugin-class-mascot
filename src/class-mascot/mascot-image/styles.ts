@@ -4,6 +4,7 @@ import { LevelDirection } from '../mascot-view/level-change';
 
 const SIZES = {
   large: '8rem',
+  option: '4rem',
   small: '2rem',
 };
 
@@ -41,10 +42,11 @@ const Frame = styled.div<{ $size: MascotImageSize; $direction: LevelDirection | 
   }
 `;
 
-const Image = styled.img`
+const Image = styled.img<{ $pixelArt: boolean }>`
   width: 100%;
   height: 100%;
   object-fit: contain;
+  image-rendering: ${({ $pixelArt }) => ($pixelArt ? 'pixelated' : 'auto')};
 `;
 
 export { MascotImageSize };
